@@ -1,7 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 
 plugins {
@@ -17,32 +16,17 @@ buildscript {
     dependencies {
         classpath("org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r")
         classpath(kotlin("gradle-plugin", version = "1.7.20"))
+        classpath("io.michaelrocks:paranoid-gradle-plugin:0.3.7")
     }
-}
-
-val commitCount = run {
-    val repo = FileRepository(rootProject.file(".git"))
-    val refId = repo.refDatabase.exactRef("refs/remotes/origin/master").objectId!!
-    Git(repo).log().add(refId).call().count()
-}
-
-val coreCommitCount = run {
-    val repo = FileRepository(rootProject.file(".git/modules/core"))
-    val refId = repo.refDatabase.exactRef("HEAD").objectId!!
-    Git(repo).log().add(refId).call().count()
 }
 
 // sync from https://github.com/LSPosed/LSPosed/blob/master/build.gradle.kts
 val defaultManagerPackageName by extra("org.lsposed.lspatch")
 val apiCode by extra(93)
-val verCode by extra(commitCount)
-val verName by extra("0.5")
-val coreVerCode by extra(coreCommitCount + 4200)
-val coreVerName by extra(
-    file("$rootDir/core/build.gradle.kts").readLines()
-        .find { it.startsWith("val verName by extra") }!!
-        .split('"')[1]
-)
+val verCode by extra(101)
+val verName by extra("1.0.1")
+val coreVerCode by extra(1012)
+val coreVerName by extra("1.0.12")
 val androidMinSdkVersion by extra(28)
 val androidTargetSdkVersion by extra(33)
 val androidCompileSdkVersion by extra(33)
@@ -58,7 +42,6 @@ tasks.register<Delete>("clean") {
 listOf("Debug", "Release").forEach { variant ->
     tasks.register("build$variant") {
         description = "Build LSPatch with $variant"
-        dependsOn(projects.jar.dependencyProject.tasks["build$variant"])
         dependsOn(projects.manager.dependencyProject.tasks["build$variant"])
     }
 }
@@ -82,16 +65,6 @@ fun Project.configureBaseExtension() {
             targetSdk = androidTargetSdkVersion
             versionCode = verCode
             versionName = verName
-
-            signingConfigs.create("config") {
-                val androidStoreFile = project.findProperty("androidStoreFile") as String?
-                if (!androidStoreFile.isNullOrEmpty()) {
-                    storeFile = rootProject.file(androidStoreFile)
-                    storePassword = project.property("androidStorePassword") as String
-                    keyAlias = project.property("androidKeyAlias") as String
-                    keyPassword = project.property("androidKeyPassword") as String
-                }
-            }
 
             externalNativeBuild {
                 cmake {
@@ -129,9 +102,6 @@ fun Project.configureBaseExtension() {
         }
 
         buildTypes {
-            all {
-                signingConfig = if (signingConfigs["config"].storeFile != null) signingConfigs["config"] else signingConfigs["debug"]
-            }
             named("debug") {
                 externalNativeBuild {
                     cmake {

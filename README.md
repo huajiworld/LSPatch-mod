@@ -11,6 +11,10 @@ Rootless implementation of LSPosed framework, integrating Xposed API by insertin
 - Min: Android 9
 - Max: In theory, same with [LSPosed](https://github.com/LSPosed/LSPosed#supported-versions)
 
+## 修改版声明
+
+这是一个测试版本，不具备稳定性和规范性，用于免root环境下单独激活jshook，将在jshook未来版本中移除。
+
 ## Download
 
 For stable releases, please go to [Github Releases page](https://github.com/LSPosed/LSPatch/releases)  

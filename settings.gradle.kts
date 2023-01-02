@@ -10,7 +10,7 @@ pluginManagement {
     plugins {
         id("com.android.library") version agpVersion
         id("com.android.application") version agpVersion
-        id("com.google.devtools.ksp") version "1.7.20-1.0.7"
+        id("com.google.devtools.ksp") version "1.7.20-1.0.6"
         id("dev.rikka.tools.refine") version "3.1.1"
     }
 }
@@ -23,14 +23,13 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LSPatch"
+rootProject.name = "LSPatch_mod"
 include(
     ":apkzlib",
     ":axmlprinter",
     ":core",
     ":hiddenapi:bridge",
     ":hiddenapi:stubs",
-    ":jar",
     ":manager",
     ":meta-loader",
     ":patch",
