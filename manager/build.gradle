@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "me.jsonet.lspatchmod"
+        minSdkVersion 28
+        targetSdkVersion 33
+        versionCode 103
+        versionName '1.0.3'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/**'
+        exclude 'license/**'
+    }
+}
+
+dependencies {
+    implementation project(':patch')
+}
+
+afterEvaluate {
+    android.applicationVariants.forEach { variant ->
+        def variantCapped = variant.name.capitalize()
+        def variantLowered = variant.name.toLowerCase()
+        def flavorCapped = variant.flavorName.capitalize()
+        def flavorLowered = variant.flavorName.toLowerCase()
+        def buildTypeCapped = variant.buildType.name.capitalize()
+        def buildTypeLowered = variant.buildType.name.toLowerCase()
+
+        task("copy${variantCapped}Assets", type: Copy) {
+            dependsOn(":meta-loader:copy$variantCapped")
+            dependsOn(":patch-loader:copy$variantCapped")
+            dependsOn("merge${variantCapped}Assets")
+
+            from("${rootProject.projectDir}/out/assets")
+            into("$buildDir/intermediates/assets/$variantLowered/merge${variantCapped}Assets")
+        }
+
+        task("build$variantCapped", type: Copy) {
+            dependsOn("assemble$variantCapped")
+            dependsOn("copy${variantCapped}Assets")
+
+            from("$buildDir/outputs/apk/${flavorLowered}/${buildTypeLowered}") {
+                include "*.apk"
+            }
+            into "${rootProject.projectDir}/out"
+        }
+    }
+}
