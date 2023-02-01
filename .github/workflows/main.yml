@@ -37,7 +37,7 @@ jobs:
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'temurin'
         cache: 'gradle'
 
@@ -118,22 +118,4 @@ jobs:
         path: |
           patch-loader/build/symbols
 
-    - name: Post to channel
-      if: ${{ github.event_name != 'pull_request' && success() && github.ref == 'refs/heads/master' }}
-      env:
-        CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        DISCUSSION_ID: ${{ secrets.DISCUSSION_ID }}
-        TOPIC_ID: ${{ secrets.TOPIC_ID }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        COMMIT_URL: ${{ github.event.head_commit.url }}
-      run: |
-        if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-          export jarRelease=$(find out/release -name "*.jar")
-          export managerRelease=$(find out/release -name "*.apk")
-          export jarDebug=$(find out/debug -name "*.jar")
-          export managerDebug=$(find out/debug -name "*.apk")
-          ESCAPED=`python3 -c 'import json,os,urllib.parse; msg = json.dumps(os.environ["COMMIT_MESSAGE"]); print(urllib.parse.quote(msg if len(msg) <= 1024 else json.dumps(os.environ["COMMIT_URL"])))'`
-          curl -v "<a href='<a href='<a href='<a href='<a href='<a href='https://api.telegram.org/bot' target='_blank'>https://api.telegram.org/bot</a>' target='_blank'>https://api.telegram.org/bot</a>' target='_blank'>https://api.telegram.org/bot</a>' target='_blank'>https://api.telegram.org/bot</a>' target='_blank'>https://api.telegram.org/bot</a>' target='_blank'>https://api.telegram.org/bot</a>${BOT_TOKEN}/sendMediaGroup?chat_id=${CHANNEL_ID}&media=%5B%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FjarRelease%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FmanagerRelease%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FjarDebug%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FmanagerDebug%22%2C%22caption%22:${ESCAPED}%7D%5D" -F jarRelease="@$jarRelease" -F managerRelease="@$managerRelease" -F jarDebug="@$jarDebug" -F managerDebug="@$managerDebug"
-          curl -v "https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup?chat_id=${DISCUSSION_ID}&message_thread_id=${TOPIC_ID}&media=%5B%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FjarRelease%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FmanagerRelease%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FjarDebug%22%7D%2C%7B%22type%22%3A%22document%22%2C%20%22media%22%3A%22attach%3A%2F%2FmanagerDebug%22%2C%22caption%22:${ESCAPED}%7D%5D" -F jarRelease="@$jarRelease" -F managerRelease="@$managerRelease" -F jarDebug="@$jarDebug" -F managerDebug="@$managerDebug"
-        fi
+    
